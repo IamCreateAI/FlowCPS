@@ -1,89 +1,11 @@
-<h1 align="center"> Flow-GRPO:<br>Training Flow Matching Models via Online RL </h1>
+<h1 align="center"> Coefficients-Preserving Sampling for Reinforcement Learning with Flow Matching </h1>
 <div align="center">
-  <a href='https://arxiv.org/abs/2505.05470'><img src='https://img.shields.io/badge/ArXiv-red?logo=arxiv'></a>  &nbsp;
-  <a href='https://gongyeliu.github.io/Flow-GRPO/'><img src='https://img.shields.io/badge/Visualization-green?logo=github'></a> &nbsp;
-  <a href="https://github.com/yifan123/flow_grpo"><img src="https://img.shields.io/badge/Code-9E95B7?logo=github"></a> &nbsp; 
-  <a href='https://huggingface.co/collections/jieliu/sd35m-flowgrpo-68298ec27a27af64b0654120'><img src='https://img.shields.io/badge/Model-blue?logo=huggingface'></a> &nbsp; 
-  <a href='https://huggingface.co/spaces/jieliu/SD3.5-M-Flow-GRPO'><img src='https://img.shields.io/badge/Demo-blue?logo=huggingface'></a> &nbsp;
+  <a href='https://arxiv.org/abs/2509.05952'><img src='https://img.shields.io/badge/ArXiv-red?logo=arxiv'></a>  &nbsp;
 </div>
 
 ## Changelog
-<details open>
-<summary><strong>2025-09-04</strong></summary>
 
-* Adding support for **Qwen-Image** and **Qwen-Image-Edit**.
-
-</details>
-
-<details>
-<summary><strong>Update History</strong></summary>
-
-**2025-08-15**
-
-* Thanks [Jing Wang](https://scholar.google.com.hk/citations?user=Q9Np_KQAAAAJ&hl=zh-CN) for adding **Wan2.1**. Training command
-```bash
-accelerate launch --config_file scripts/accelerate_configs/multi_gpu.yaml --num_processes=1 --main_process_port 29503 scripts/train_wan2_1.py --config config/grpo.py:general_ocr_wan2_1
-```
-
-**2025-08-14**
-
-* Adding reward curve of Flow-GRPO-Fast vs. Flow-GRPO. In Pickscore reward, Flow-GRPO-Fast is comparable to Flow-GRPO with only 2 steps training.
-
-
-**2025-08-04**
-
-* Adding support for **FLUX.1-Kontext-dev**. For the counting task, we use Geneval reward to detect object counts and CLIP feature similarity to ensure consistency between the original and edited images. This implementation offers a runnable pipeline, but the training set contains only 800 samples. Making Flow-GRPO truly effective for editing tasks still requires further exploration by the community.
-
-
-**2025-07-31**
-
-- Adding Flow-GRPO-Fast.
-
-**2025-07-28**
-
-- Adding support for **FLUX.1-dev**.
-- Adding support for CLIPScore as reward model.
-- Introducing `config.sample.same_latent` to control whether the same noise is reused for identical prompts, addressing [Issue #7](https://github.com/yifan123/flow_grpo/issues/7).
-
-**2025-05-15** 
-
-- 🔥We showcase image examples from three tasks and their training evolution at https://gongyeliu.github.io/Flow-GRPO. Check them out!
-- 🔥We now provide an online demo for all three tasks at https://huggingface.co/spaces/jieliu/SD3.5-M-Flow-GRPO. You're welcome to try it out!
-</details>
-
-## FAQ
-
-* Please use **fp16** for training whenever possible, as it provides higher precision than bf16, resulting in smaller log-probability errors between data collection and training. For Flux and Wan, becauase fp16 inference cannot produce valid images or videos, you will have to use **bf16** for training. Note that log-probability errors tend to be smaller at high-noise steps and larger at low-noise steps. Training only on high-noise steps yields better results in this case. Thanks to [Jing Wang](https://scholar.google.com.hk/citations?user=Q9Np_KQAAAAJ&hl=zh-CN) for these observations.
-
-* When using **Flow-GRPO-Fast**, set a relatively small `clip_range`, otherwise training may crash.
-
-* When implementing a new model, please check whether using different batch sizes leads to slight differences in the output. SD3 has this issue, which is why I ensure that the batch size for training is the same as that used for data collection.
-
-
-## Flow-GRPO-Fast
-We propose Flow-GRPO-Fast, an accelerated variant of Flow-GRPO that requires training on **only one or two denoising step** per trajectory. For each prompt, we first generate a deterministic trajectory using ODE sampling. At a randomly chosen intermediate step, we inject noise and switch to SDE sampling to generate a group. The rest of the process continues with ODE sampling. This confines stochasticity to one or two steps, allowing training to focus solely on that steps. This few-step training idea was primarily proposed by [Ziyang Yuan](https://scholar.google.com/citations?user=fWxWEzsAAAAJ&hl=en) during our discussions in early June. 
-
-Flow-GRPO-Fast achieves significant efficiency gains:
-
-- Each trajectory is trained only once or twice, significantly reducing the training cost.
-
-- Sampling before branching requires only a single prompt without group expansion, further speeding up data collection.
-
-Experiments on PickScore show that Flow-GRPO-Fast matches the reward performance of Flow-GRPO while offering faster training speed. The x-axis in the figure represents training epochs. Flow-GRPO-Fast with 2 training steps per iteration performs better than Flow-GRPO, while Flow-GRPO-Fast with only 1 training step per iteration performs slightly worse than Flow-GRPO. In both cases, compared to Flow-GRPO’s 10 training steps per iteration, the training process is significantly faster.
-
-<p align="center">
-  <img src="flow_grpo/assets/flow_grpo_fast.png" alt="Flow-GRPO-Fast Illustration" width=450"/>
-</p>
-
-
-Please use scripts in `scripts/multi_node/sd3_fast` to run these experiments.
-
-## 🤗 Model
-| Task    | Model |
-| -------- | -------- |
-| GenEval     | [🤗GenEval](https://huggingface.co/jieliu/SD3.5M-FlowGRPO-GenEval) |
-| Text Rendering     | [🤗Text](https://huggingface.co/jieliu/SD3.5M-FlowGRPO-Text) |
-| Human Preference Alignment     | [🤗PickScore](https://huggingface.co/jieliu/SD3.5M-FlowGRPO-PickScore) |
+2025/09/09: Please check [this commit](https://github.com/IamCreateAI/FlowCPS/commit/814c35979d9ee3563178373bccca0605ded6ffa9) for the implementation of Flow-CPS. We also provide the code for generate Figure 3 in [this notebook](https://github.com/IamCreateAI/FlowCPS/blob/main/scripts/analysis/sde_noise_level.ipynb)
 
 
 ## 🚀 Quick Started
@@ -328,24 +250,16 @@ You can adjust the parameters in `config/grpo.py` to tune different hyperparamet
 Additionally, setting `config.train.gradient_accumulation_steps = config.sample.num_batches_per_epoch // 2`.
 
 ## 🤗 Acknowledgement
-This repo is based on [ddpo-pytorch](https://github.com/kvablack/ddpo-pytorch) and [diffusers](https://github.com/huggingface/diffusers). We thank the authors for their valuable contributions to the AIGC community. Special thanks to Kevin Black for the excellent *ddpo-pytorch* repo.
+This repo is based on [flow-grpo](https://github.com/yifan123/flow_grpo), [ddpo-pytorch](https://github.com/kvablack/ddpo-pytorch) and [diffusers](https://github.com/huggingface/diffusers). We thank the authors for their valuable contributions to the AIGC community. Special thanks to Kevin Black for the excellent *ddpo-pytorch* repo.
 
 ## ⭐Citation
-If you find Flow-GRPO useful for your research or projects, we would greatly appreciate it if you could cite the following paper:
+If you find Flow-CPS useful for your research or projects, we would greatly appreciate it if you could cite the following paper:
 ```
-@article{liu2025flow,
-  title={Flow-grpo: Training flow matching models via online rl},
-  author={Liu, Jie and Liu, Gongye and Liang, Jiajun and Li, Yangguang and Liu, Jiaheng and Wang, Xintao and Wan, Pengfei and Zhang, Di and Ouyang, Wanli},
-  journal={arXiv preprint arXiv:2505.05470},
+@article{wang2025coefficients,
+  title={Coefficients-Preserving Sampling for Reinforcement Learning with Flow Matching},
+  author={Wang, Feng and Yu, Zihao},
+  journal={arXiv preprint arXiv:2509.05952},
   year={2025}
 }
 ```
-If you find Flow-DPO useful for your research or projects, we would greatly appreciate it if you could cite the following paper:
-```
-@article{liu2025improving,
-  title={Improving video generation with human feedback},
-  author={Liu, Jie and Liu, Gongye and Liang, Jiajun and Yuan, Ziyang and Liu, Xiaokun and Zheng, Mingwu and Wu, Xiele and Wang, Qiulin and Qin, Wenyu and Xia, Menghan and others},
-  journal={arXiv preprint arXiv:2501.13918},
-  year={2025}
-}
 ```
