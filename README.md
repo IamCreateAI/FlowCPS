@@ -5,7 +5,7 @@
 
 ## Changelog
 
-2025/09/09: Please check [this commit](https://github.com/IamCreateAI/FlowCPS/commit/814c35979d9ee3563178373bccca0605ded6ffa9) for the implementation of Flow-CPS. We also provide the code for generate Figure 3 in [this notebook](https://github.com/IamCreateAI/FlowCPS/blob/main/scripts/analysis/sde_noise_level.ipynb)
+2025/09/09: Please check [this commit](https://github.com/IamCreateAI/FlowCPS/commit/814c35979d9ee3563178373bccca0605ded6ffa9) for the implementation of Flow-CPS. We also provide the code to generate Figure 2 in [this notebook](https://github.com/IamCreateAI/FlowCPS/blob/main/scripts/analysis/sde_noise_level.ipynb)
 
 
 ## 🚀 Quick Started
