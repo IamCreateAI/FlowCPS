@@ -44,11 +44,16 @@ def sde_step_with_logprob(
     sigma_max = self.sigmas[1].item()
     dt = sigma_prev - sigma
 
-    std_dev_t = torch.sqrt(sigma / (1 - torch.where(sigma == 1, sigma_max, sigma)))*noise_level
-    
-    # our sde
-    prev_sample_mean = sample*(1+std_dev_t**2/(2*sigma)*dt)+model_output*(1+std_dev_t**2*(1-sigma)/(2*sigma))*dt
-    
+    # Flow-SDE
+    #std_dev_t = torch.sqrt(sigma / (1 - torch.where(sigma == 1, sigma_max, sigma)))*noise_level * torch.sqrt(-1*dt)
+    # prev_sample_mean = sample*(1+std_dev_t**2/(2*sigma)*dt)+model_output*(1+std_dev_t**2*(1-sigma)/(2*sigma))*dt
+
+    # Flow-CPS
+    std_dev_t = sigma_prev  * math.sin(noise_level * math.pi / 2) # sigma_t in paper
+    pred_original_sample = sample - sigma * model_output # predicted x_0 in paper
+    noise_estimate = sample + model_output * (1 - sigma) # predicted x_1 in paper
+    prev_sample_mean = pred_original_sample * (1 - sigma_prev) + noise_estimate * torch.sqrt(sigma_prev**2 - std_dev_t**2)
+
     if prev_sample is None:
         variance_noise = randn_tensor(
             model_output.shape,
@@ -56,13 +61,10 @@ def sde_step_with_logprob(
             device=model_output.device,
             dtype=model_output.dtype,
         )
-        prev_sample = prev_sample_mean + std_dev_t * torch.sqrt(-1*dt) * variance_noise
+        prev_sample = prev_sample_mean + std_dev_t * variance_noise
 
-    log_prob = (
-        -((prev_sample.detach() - prev_sample_mean) ** 2) / (2 * ((std_dev_t * torch.sqrt(-1*dt))**2))
-        - torch.log(std_dev_t * torch.sqrt(-1*dt))
-        - torch.log(torch.sqrt(2 * torch.as_tensor(math.pi)))
-    )
+    # remove all constants
+    log_prob = -((prev_sample.detach() - prev_sample_mean) ** 2)
 
     # mean along all but batch dimension
     log_prob = log_prob.mean(dim=tuple(range(1, log_prob.ndim)))
