@@ -1,7 +1,8 @@
 <h1 align="center"> Coefficients-Preserving Sampling for Reinforcement Learning with Flow Matching </h1>
-<div align="center">
-  <a href='https://arxiv.org/abs/2509.05952'><img src='https://img.shields.io/badge/ArXiv-red?logo=arxiv'></a>  &nbsp;
-</div>
+
+paper link: https://arxiv.org/abs/2509.05952
+
+中文介绍: https://zhuanlan.zhihu.com/p/1948388095151026330
 
 ## Changelog
 
